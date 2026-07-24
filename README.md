@@ -4,7 +4,8 @@
 **Institution**: Horizon Campus | Faculty of Information Technology  
 **Module**: IT41043 -- Intelligent Systems (Agentic AI)  
 
-**Live Demo**: [Streamlit Cloud App](https://your-app-name.streamlit.app) *(update after deployment)*
+**Live Demo**: [Streamlit Cloud App](https://bawan2001-career-ai-assistant.streamlit.app)
+**GitHub Repository**: [github.com/Bawan2001/career-ai-assistant](https://github.com/Bawan2001/career-ai-assistant)
 
 ---
 
