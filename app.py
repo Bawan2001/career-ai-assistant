@@ -60,12 +60,7 @@ if "pipeline_results" not in st.session_state:
     st.session_state.pipeline_results = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "llm_provider" not in st.session_state:
-    st.session_state.llm_provider = "groq"
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
-
-# Sidebar - Settings & Model Router Configuration
+# Sidebar - Settings Configuration
 with st.sidebar:
     st.image("https://img.icons8.com/isometric-folders/100/brain.png", width=64)
     st.title("🤖 System Configuration")
@@ -74,50 +69,10 @@ with st.sidebar:
     st.caption("Intelligent Systems - Agentic AI Project")
     
     st.divider()
-    
-    st.subheader("⚙️ Multi-Model LLM Router")
-    provider_choice = st.selectbox(
-        "Select LLM Provider",
-        ["Groq", "OpenRouter", "Google Gemini", "OpenAI"],
-        index=0
-    )
-    st.session_state.llm_provider = provider_choice.lower()
-
-    # Check key from environment or secrets
-    active_key_env_var = {
-        "groq": "GROQ_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
-        "google gemini": "GOOGLE_API_KEY",
-        "gemini": "GOOGLE_API_KEY",
-        "openai": "OPENAI_API_KEY"
-    }.get(st.session_state.llm_provider, "")
-
-    active_key = os.getenv(active_key_env_var, "")
-
-    if active_key:
-        st.success(f"✅ **{provider_choice} API Key**: Auto-loaded from secrets")
-    else:
-        st.info("ℹ️ Using rule-based fallback mode or environment keys.")
-
-    with st.expander("🔑 Override API Key (Optional)"):
-        manual_key = st.text_input(
-            f"{provider_choice} API Key",
-            type="password",
-            value=st.session_state.api_key,
-            help="Optional manual override. By default, keys are loaded automatically from .streamlit/secrets.toml"
-        )
-        if manual_key:
-            st.session_state.api_key = manual_key
-
-    st.info("💡 **Model Routing Strategy**\n\n- **Fast Tier (Llama 3.1 8B / Flash)**: Intent Routing & Parsing\n- **Deep Tier (Llama 3.3 70B / Sonnet / GPT-4o)**: CV Analysis, Gap Analysis & Reflection")
-
-    st.divider()
     st.caption("Built with LangGraph, Streamlit, FAISS & Sentence-Transformers.")
 
 # Instantiate Multi-Agent Workflow
-workflow = CareerAssistantWorkflow(provider=st.session_state.llm_provider)
-if st.session_state.api_key:
-    workflow.llm_router.update_provider_keys(st.session_state.llm_provider, st.session_state.api_key)
+workflow = CareerAssistantWorkflow()
 
 # Main Header Banner
 st.markdown("""
