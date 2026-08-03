@@ -14,14 +14,28 @@ class LLMRouter:
     """
 
     def __init__(self, provider: Optional[str] = None):
-        self.provider = provider or os.getenv("DEFAULT_LLM_PROVIDER", "groq").lower()
+        # Load Streamlit secrets into environment if available
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets'):
+                for key in ["GROQ_API_KEY", "OPENROUTER_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY", "DEFAULT_LLM_PROVIDER"]:
+                    if key in st.secrets and not os.getenv(key):
+                        os.environ[key] = str(st.secrets[key])
+        except Exception:
+            pass
+
+        self.provider = (provider or os.getenv("DEFAULT_LLM_PROVIDER", "groq")).lower()
+        self._refresh_keys()
+
+    def _refresh_keys(self):
+        """Refresh API keys from environment variables."""
         self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
 
     def update_provider_keys(self, provider: str, api_key: str):
-        """Update provider and key dynamically from Streamlit UI."""
+        """Update provider and key dynamically."""
         self.provider = provider.lower()
         if self.provider == "groq":
             self.groq_api_key = api_key
@@ -41,6 +55,7 @@ class LLMRouter:
         Instantiate LangChain LLM object based on task requirement and available providers.
         task_tier: 'fast' or 'reasoning'
         """
+        self._refresh_keys()
         if self.provider == "groq" and self.groq_api_key:
             try:
                 from langchain_groq import ChatGroq

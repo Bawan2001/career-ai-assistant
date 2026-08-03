@@ -81,19 +81,34 @@ with st.sidebar:
         ["Groq", "OpenRouter", "Google Gemini", "OpenAI"],
         index=0
     )
-
-    api_key_input = st.text_input(
-        f"{provider_choice} API Key",
-        type="password",
-        value=st.session_state.api_key,
-        help="Enter active API Key to enable live LLM execution."
-    )
-
-    if api_key_input:
-        st.session_state.api_key = api_key_input
-
     st.session_state.llm_provider = provider_choice.lower()
-    
+
+    # Check key from environment or secrets
+    active_key_env_var = {
+        "groq": "GROQ_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+        "google gemini": "GOOGLE_API_KEY",
+        "gemini": "GOOGLE_API_KEY",
+        "openai": "OPENAI_API_KEY"
+    }.get(st.session_state.llm_provider, "")
+
+    active_key = os.getenv(active_key_env_var, "")
+
+    if active_key:
+        st.success(f"✅ **{provider_choice} API Key**: Auto-loaded from secrets")
+    else:
+        st.info("ℹ️ Using rule-based fallback mode or environment keys.")
+
+    with st.expander("🔑 Override API Key (Optional)"):
+        manual_key = st.text_input(
+            f"{provider_choice} API Key",
+            type="password",
+            value=st.session_state.api_key,
+            help="Optional manual override. By default, keys are loaded automatically from .streamlit/secrets.toml"
+        )
+        if manual_key:
+            st.session_state.api_key = manual_key
+
     st.info("💡 **Model Routing Strategy**\n\n- **Fast Tier (Llama 3.1 8B / Flash)**: Intent Routing & Parsing\n- **Deep Tier (Llama 3.3 70B / Sonnet / GPT-4o)**: CV Analysis, Gap Analysis & Reflection")
 
     st.divider()
